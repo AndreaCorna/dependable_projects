@@ -61,7 +61,7 @@ for key in map_files.keys():
 
 	count = 1
 	#retrieve failed and working components parsing name file previously load
-	name_file_splits = (map_files[key].replace(".txt","")).split(';')
+	name_file_splits = (map_files[key].replace(".txt","")).split(':')
 
 	index = 0
 	config_map = {}
