@@ -73,9 +73,10 @@ void MainWindow::generateFiles(){
         }
         qDebug() << powerMap.size();
         flpFile.close();
-        QString powFileName = "system.pow";
-        QFile powFile(powFileName);
         QString idWorkingState = ui->idLine->text();
+
+        QString powFileName = idWorkingState+"_system.pow";
+        QFile powFile(powFileName);
         QString nameFile = QString(""+idWorkingState+"_");
         qDebug() << nameFile;
         if(powFile.open(QIODevice::ReadWrite)){
