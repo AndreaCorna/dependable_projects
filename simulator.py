@@ -86,8 +86,10 @@ for key in map_files.keys():
 	
 	#for every component compute alpha parameter using computeAlpha
 	#and write in file for caliper simulation
+	print "::::::::::::::::::::::::::::::::::::::::::"
+	dictionary = collections.OrderedDict(sorted(dictionary.items()))
 	for key in dictionary.keys():
-		print dictionary[key]
+		print key +  " " +dictionary[key]
 
 		status, output = commands.getstatusoutput(SCRIPT_DIRECTORY+"/computeAlpha "+str(dictionary[key]))
 		alpha = output.split(': ')[1]
