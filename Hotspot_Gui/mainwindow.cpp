@@ -115,7 +115,7 @@ void MainWindow::generateFiles(){
         nameFile.append(".txt");
         qDebug() << nameFile;
 
-        QString command  = scriptPath+"/hotspot -f system.flp -p "+powFileName+"-steady_file "+dataPath+"/"+nameFile+"";
+        QString command  = scriptPath+"/hotspot -f system.flp -p "+powFileName+" -steady_file "+dataPath+"/"+nameFile+"";
         QProcess::startDetached( "/bin/bash", QStringList() << "-c"<<command);
     }
 
