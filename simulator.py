@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
 
-BASE_DIRECTORY = "/home/andrea/Desktop"
+BASE_DIRECTORY = "."
 DATA_DIRECTORY = BASE_DIRECTORY+"/data"
 RESULT_DIRECTORY = BASE_DIRECTORY+"/result"
 SCRIPT_DIRECTORY = BASE_DIRECTORY+"/script"

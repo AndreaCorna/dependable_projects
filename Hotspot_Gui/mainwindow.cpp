@@ -54,8 +54,11 @@ void MainWindow::generateFiles(){
             QString utlization = ui->tableWidget_2->item(i,0)->text();
             QString pIdle = ui->tableWidget_2->item(i,1)->text();
             QString pMax = ui->tableWidget_2->item(i,2)->text();
-            //TODO retrieve failed information
+            QCheckBox *cb = qobject_cast<QCheckBox *>(ui->tableWidget_2->cellWidget(i, 3));
             bool isFailed = false;
+            if(cb->isChecked()){
+                isFailed = true;
+            }
 
             qDebug() << name << " " << width << " "<< height << " "<< leftX << " "<< bottomY << " "<< utlization;
             float power = pIdle.toFloat() + ( pMax.toFloat() - pIdle.toFloat())*utlization.toFloat();
@@ -70,12 +73,29 @@ void MainWindow::generateFiles(){
     flpFile.close();
     QString powFileName = "system.pow";
     QFile powFile(powFileName);
+    QString idWorkingState = ui->idLine->text();
+    QString nameFile = QString(""+idWorkingState+"_");
+    qDebug() << nameFile;
     if(powFile.open(QIODevice::ReadWrite)){
         QTextStream stream(&powFile);
         for(int i = 0; i < powerMap.keys().length(); i++){
             stream << powerMap.keys()[i].toUpper();
             if(i != (powerMap.keys().length()-1)){
                 stream << " ";
+            }
+            if(!failedMap.value(powerMap.keys()[i])){
+                nameFile.append("1");
+                qDebug() << nameFile;
+
+            }else{
+                nameFile.append("0");
+                qDebug() << nameFile;
+
+            }
+            if(i != (powerMap.keys().length()-1 )){
+                nameFile.append(":");
+                qDebug() << nameFile;
+
             }
         }
          stream << "\n";
@@ -88,25 +108,7 @@ void MainWindow::generateFiles(){
         }
         stream << "\n";
     }
-    QString idWorkingState = ui->idLine->text();
-    QString nameFile = QString(""+idWorkingState+"_");
-    qDebug() << nameFile;
-    for(int i =0;i<failedMap.keys().length();i++){
-        if(failedMap.value(failedMap.keys()[i])){
-            nameFile.append("1");
-            qDebug() << nameFile;
 
-        }else{
-            nameFile.append("0");
-            qDebug() << nameFile;
-
-        }
-        if(i != (failedMap.keys().length() -1 )){
-            nameFile.append(":");
-            qDebug() << nameFile;
-
-        }
-    }
     nameFile.append(".txt");
     qDebug() << nameFile;
 
@@ -157,10 +159,14 @@ void MainWindow::setupTables(){
 void MainWindow::addNewLine(){
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget_2->insertRow(ui->tableWidget_2->rowCount());
-    QCheckBox *cb1 = new QCheckBox;
-    QTableWidgetItem *item = new QTableWidgetItem();
-    item->data(Qt::CheckStateRole);
-    item->setCheckState(Qt::Unchecked);
-    ui->tableWidget_2->setCellWidget(ui->tableWidget_2->rowCount()-1,3,cb1);
+
+    QWidget *pWidget = new QWidget();
+    QCheckBox *pCheckBox = new QCheckBox();
+    QHBoxLayout *pLayout = new QHBoxLayout(pWidget);
+    pLayout->addWidget(pCheckBox);
+    pLayout->setAlignment(Qt::AlignCenter);
+    pLayout->setContentsMargins(0,0,0,0);
+    pWidget->setLayout(pLayout);
+    ui->tableWidget_2->setCellWidget(ui->tableWidget_2->rowCount()-1,3,pCheckBox);
 
 }
