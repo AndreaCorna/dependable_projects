@@ -14,7 +14,10 @@ if len(sys.argv) <= 1:
 	exit(-1)
 
 number_component = int(sys.argv[1])
+time_remapping = int(sys.argv[2])
+
 print "Number of component "+str(number_component)
+print "Time remapping "+str(time_remapping)
 
 #load all file in directory data where there are all information obtained with hotspot
 #file name is indexconfig_statecomp1;indexconfig_statecomp2....txt
@@ -90,7 +93,8 @@ for key in map_files.keys():
 		  second_elem = to_be_written.split(",")[1]
 		  to_be_written = second_elem+","+first_elem
 		print to_be_written
-		list_states.append(to_be_written)
+		if len(to_be_written) > 1:
+		  list_states.append(to_be_written)
 		out_file.write(to_be_written)
 
 	out_file.write(" ")
@@ -113,9 +117,16 @@ for key in map_files.keys():
 
 out_file.close()
 
+command_montecarlo = None
+if time_remapping == 0:
+  command_montecarlo = SCRIPT_DIRECTORY+"/caliper  -f "+RESULT_DIRECTORY+"/data_for_caliper_"+string_timestamp+".txt -t 100000 -o "+RESULT_DIRECTORY+"/reliability_curve_"+string_timestamp+".txt"
+else:
+  command_montecarlo = SCRIPT_DIRECTORY+"/caliper  -f "+RESULT_DIRECTORY+"/data_for_caliper_"+string_timestamp+".txt -t 10000 -p "+str(time_remapping)+ " -o "+RESULT_DIRECTORY+"/reliability_curve_"+string_timestamp+".txt"
 
+print command_montecarlo
 #montecarlo simulation
-status, output = commands.getstatusoutput(SCRIPT_DIRECTORY+"/caliper  -f "+RESULT_DIRECTORY+"/data_for_caliper_"+string_timestamp+".txt -t 100000 -o "+RESULT_DIRECTORY+"/reliability_curve_"+string_timestamp+".txt")
+status, output = commands.getstatusoutput(command_montecarlo)
+print output
 
 #print result
 dataset = np.genfromtxt(fname=RESULT_DIRECTORY+'/reliability_curve_'+string_timestamp+'.txt',skip_header=0) 
