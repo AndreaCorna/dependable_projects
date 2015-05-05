@@ -41,6 +41,8 @@ string_timestamp = str(datetime.datetime.now()).replace(" ","_")
 #output file: source data for caliper simulation
 out_file = open(RESULT_DIRECTORY+"/data_for_caliper_"+string_timestamp+".txt","aw")
 
+list_states = []
+
 #for every key(index_config)
 for key in map_files.keys():
 
@@ -75,12 +77,21 @@ for key in map_files.keys():
 		out_file.write("#")
 	else:
 		first_item = True
+		to_be_written = ""
 		for failed in config_map.keys():
 			if first_item:
-				out_file.write(str(failed))
+				to_be_written = to_be_written + str(failed)
 				first_item = False
 			else:
-				out_file.write(","+str(failed))
+				to_be_written = to_be_written + "," + str(failed)
+		print to_be_written
+		if to_be_written in list_states:
+		  first_elem = to_be_written.split(",")[0]
+		  second_elem = to_be_written.split(",")[1]
+		  to_be_written = second_elem+","+first_elem
+		print to_be_written
+		list_states.append(to_be_written)
+		out_file.write(to_be_written)
 
 	out_file.write(" ")
 	
@@ -118,10 +129,10 @@ fig = plt.figure()
 ax1 = fig.add_subplot(111)
 
 ax1.set_title("System Reliability")    
-ax1.set_xlabel('time[sec]')
+ax1.set_xlabel('time[hour]')
 ax1.set_ylabel('R(t)')
 
-ax1.plot(x,y, c='r', label='data simulation')
+ax1.plot(x,y, c='r', label='Reliability')
 
 leg = ax1.legend()
 
