@@ -127,7 +127,9 @@ print command_montecarlo
 #montecarlo simulation
 status, output = commands.getstatusoutput(command_montecarlo)
 print output
-
+out_file2 = open(RESULT_DIRECTORY+"/result_MTTF"+string_timestamp+".txt","aw")
+out_file2.write(output)
+out_file2.close()
 #print result
 dataset = np.genfromtxt(fname=RESULT_DIRECTORY+'/reliability_curve_'+string_timestamp+'.txt',skip_header=0) 
 
