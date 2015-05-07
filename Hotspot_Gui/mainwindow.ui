@@ -136,6 +136,9 @@
             <widget class="QTableWidget" name="tableWidget_2"/>
            </item>
            <item>
+            <widget class="QTableWidget" name="tableWidget_3"/>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <widget class="QLabel" name="label_3">
@@ -164,17 +167,24 @@
               <widget class="QLineEdit" name="idLine"/>
              </item>
              <item>
-              <spacer name="horizontalSpacer_10">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Total Time</string>
                </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="totalTime"/>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Current Time</string>
                </property>
-              </spacer>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="currentTime"/>
              </item>
             </layout>
            </item>
@@ -267,6 +277,29 @@
             </widget>
            </item>
            <item>
+            <spacer name="horizontalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="intermediate">
+             <property name="text">
+              <string>Intermediate</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="horizontalSpacer_3">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -328,8 +361,8 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>331</x>
-     <y>384</y>
+     <x>312</x>
+     <y>402</y>
     </hint>
     <hint type="destinationlabel">
      <x>719</x>
@@ -344,8 +377,8 @@
    <slot>generateFiles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>211</x>
-     <y>395</y>
+     <x>180</x>
+     <y>402</y>
     </hint>
     <hint type="destinationlabel">
      <x>183</x>
@@ -360,12 +393,28 @@
    <slot>addNewLine()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>474</x>
-     <y>390</y>
+     <x>444</x>
+     <y>402</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
      <y>515</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>intermediate</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>intermediate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>530</x>
+     <y>397</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>538</x>
+     <y>497</y>
     </hint>
    </hints>
   </connection>
@@ -374,5 +423,6 @@
   <slot>clear()</slot>
   <slot>generateFiles()</slot>
   <slot>addNewLine()</slot>
+  <slot>intermediate()</slot>
  </slots>
 </ui>

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "QString"
+#include "QHash"
 
 namespace Ui {
 class MainWindow;
@@ -20,12 +21,14 @@ public slots:
     void generateFiles();
     void clear();
     void addNewLine();
+    void intermediate();
 
 private:
     Ui::MainWindow *ui;
     void setupTables();
     QString dataPath;
     QString scriptPath;
+    QHash<QString,double> alphas;
 };
 
 #endif // MAINWINDOW_H

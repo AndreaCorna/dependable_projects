@@ -43,6 +43,7 @@ void MainWindow::generateFiles(){
 
         QString flpFileName = "system.flp";
         QFile flpFile(flpFileName);
+        qDebug() << "open";
         if(flpFile.open(QIODevice::ReadWrite)){
             QTextStream stream(&flpFile);
 
@@ -53,7 +54,7 @@ void MainWindow::generateFiles(){
                 QString leftX = ui->tableWidget->item(i,3)->text().replace(",",".");
                 QString bottomY = ui->tableWidget->item(i,4)->text().replace(",",".");
 
-                QString utlization = ui->tableWidget_2->item(i,0)->text();
+                //QString utlization = ui->tableWidget_2->item(i,0)->text();
                 QString pIdle = ui->tableWidget_2->item(i,1)->text();
                 QString pMax = ui->tableWidget_2->item(i,2)->text();
                 QCheckBox *cb = qobject_cast<QCheckBox *>(ui->tableWidget_2->cellWidget(i, 3));
@@ -62,9 +63,9 @@ void MainWindow::generateFiles(){
                     isFailed = true;
                 }
 
-                qDebug() << name << " " << width << " "<< height << " "<< leftX << " "<< bottomY << " "<< utlization;
-                float power = pIdle.toFloat() + ( pMax.toFloat() - pIdle.toFloat())*utlization.toFloat();
-                powerMap.insert(name,power);
+                qDebug() << name << " " << width << " "<< height << " "<< leftX << " "<< bottomY << " ";
+                //float power = pIdle.toFloat() + ( pMax.toFloat() - pIdle.toFloat())*utlization.toFloat();
+                powerMap.insert(name,0);
                 stream << name.toUpper() << " " << width << " "<< height << " "<< leftX << " "<< bottomY << "\n";
                 qDebug() << isFailed;
                 failedMap.insert(name,isFailed);
@@ -75,48 +76,52 @@ void MainWindow::generateFiles(){
         flpFile.close();
         QString idWorkingState = ui->idLine->text();
 
-        QString powFileName = idWorkingState+"_system.pow";
-        QFile powFile(powFileName);
-        QString nameFile = QString(""+idWorkingState+"_");
+        //QString powFileName = idWorkingState+"_system.pow";
+
+        QString nameFile = QString(dataPath+"/"+idWorkingState+"_");
+
         qDebug() << nameFile;
-        if(powFile.open(QIODevice::ReadWrite)){
-            QTextStream stream(&powFile);
-            for(int i = 0; i < powerMap.keys().length(); i++){
-                stream << powerMap.keys()[i].toUpper();
-                if(i != (powerMap.keys().length()-1)){
-                    stream << " ";
-                }
-                if(!failedMap.value(powerMap.keys()[i])){
-                    nameFile.append("1");
-                    qDebug() << nameFile;
+        for(int i = 0; i < powerMap.keys().length(); i++){
+            /*stream << powerMap.keys()[i].toUpper();
+            if(i != (powerMap.keys().length()-1)){
+                stream << " ";
+            }*/
+            if(!failedMap.value(powerMap.keys()[i])){
+                nameFile.append("1");
+                qDebug() << nameFile;
 
-                }else{
-                    nameFile.append("0");
-                    qDebug() << nameFile;
+            }else{
+                nameFile.append("0");
+                qDebug() << nameFile;
 
-                }
-                if(i != (powerMap.keys().length()-1 )){
-                    nameFile.append(":");
-                    qDebug() << nameFile;
-
-                }
             }
-             stream << "\n";
-            for(int i = 0; i < powerMap.keys().length(); i++){
-                qDebug()<< "in loop";
-                stream << powerMap.value(powerMap.keys()[i]);
-                if(i != (powerMap.keys().length()-1)){
-                    stream << " ";
-                }
+            if(i != (powerMap.keys().length()-1 )){
+                nameFile.append(":");
+                qDebug() << nameFile;
+
             }
-            stream << "\n";
         }
 
         nameFile.append(".txt");
-        qDebug() << nameFile;
 
-        QString command  = scriptPath+"/hotspot -f system.flp -p "+powFileName+" -steady_file "+dataPath+"/"+nameFile+"";
-        QProcess::startDetached( "/bin/bash", QStringList() << "-c"<<command);
+        QFile powFile(nameFile);
+        if(powFile.open(QIODevice::ReadWrite)){
+            QTextStream stream(&powFile);
+            for(int i = 0; i < powerMap.keys().length(); i++){
+                qDebug()<< "in loop";
+                double alpha = ui->totalTime->text().toFloat()/alphas.value(powerMap.keys()[i].toUpper());
+                stream << alpha;
+                if(i != (powerMap.keys().length()-1)){
+                    stream << " ";
+                }
+            }
+        }
+
+
+       // QString command  = scriptPath+"/hotspot -f system.flp -p "+powFileName+" -steady_file "+dataPath+"/"+nameFile+"";
+        //QProcess::startDetached( "/bin/bash", QStringList() << "-c"<<command);
+
+        alphas.clear();
     }
 
 
@@ -145,6 +150,7 @@ void MainWindow::setupTables(){
    QTableWidgetItem *item7 = new QTableWidgetItem("P_Idle");
    QTableWidgetItem *item8 = new QTableWidgetItem("P_Max");
    QTableWidgetItem *item10 = new QTableWidgetItem("Failed");
+   QTableWidgetItem *item11 = new QTableWidgetItem("Active");
 
 
    ui->tableWidget->setHorizontalHeaderItem(0,item);
@@ -157,13 +163,19 @@ void MainWindow::setupTables(){
    ui->tableWidget_2->setHorizontalHeaderItem(2,item8);
    ui->tableWidget_2->setHorizontalHeaderItem(3,item10);
 
+   ui->tableWidget_3->insertColumn(0);
+   ui->tableWidget_3->insertColumn(1);
 
 
+   ui->tableWidget_3->setHorizontalHeaderItem(0,item);
+   ui->tableWidget_3->setHorizontalHeaderItem(1,item11);
 }
 
 void MainWindow::addNewLine(){
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget_2->insertRow(ui->tableWidget_2->rowCount());
+    ui->tableWidget_3->insertRow(ui->tableWidget_3->rowCount());
+
 
     QWidget *pWidget = new QWidget();
     QCheckBox *pCheckBox = new QCheckBox();
@@ -173,5 +185,118 @@ void MainWindow::addNewLine(){
     pLayout->setContentsMargins(0,0,0,0);
     pWidget->setLayout(pLayout);
     ui->tableWidget_2->setCellWidget(ui->tableWidget_2->rowCount()-1,3,pCheckBox);
+
+    QWidget *pWidget1 = new QWidget();
+    QCheckBox *pCheckBox1 = new QCheckBox();
+    QHBoxLayout *pLayout1 = new QHBoxLayout(pWidget1);
+    pLayout1->addWidget(pCheckBox1);
+    pLayout1->setAlignment(Qt::AlignCenter);
+    pLayout1->setContentsMargins(0,0,0,0);
+    pWidget1->setLayout(pLayout1);
+    ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,1,pCheckBox1);
+
+
+}
+
+void MainWindow::intermediate(){
+    qDebug() << "click intermediate";
+    QString dataToWrite = "";
+    QString flpFileName = "system.flp";
+    QFile flpFile(flpFileName);
+    if(flpFile.open(QIODevice::ReadWrite)){
+        QTextStream stream(&flpFile);
+
+        for(int i = 0; i < ui->tableWidget->rowCount(); i++){
+            QString name = ui->tableWidget->item(i,0)->text().toUpper();
+            QString width = ui->tableWidget->item(i,1)->text().replace(",",".");
+            QString height = ui->tableWidget->item(i,2)->text().replace(",",".");
+            QString leftX = ui->tableWidget->item(i,3)->text().replace(",",".");
+            QString bottomY = ui->tableWidget->item(i,4)->text().replace(",",".");
+            QCheckBox *cb = qobject_cast<QCheckBox *>(ui->tableWidget_2->cellWidget(i, 3));
+            bool isFailed = false;
+            if(cb->isChecked()){
+                isFailed = true;
+            }
+            stream << name.toUpper() << " " << width << " "<< height << " "<< leftX << " "<< bottomY << "\n";
+
+        }
+    }
+    flpFile.close();
+    QString temporaryFileName = "system.pow";
+    QFile powFile(temporaryFileName);
+    if(powFile.open(QIODevice::ReadWrite)){
+        QTextStream stream(&powFile);
+
+        for(int i = 0; i < ui->tableWidget_3->rowCount(); i++){
+            QString name = ui->tableWidget->item(i,0)->text().toUpper();
+            if(!alphas.keys().contains(name)){
+                alphas.insert(name,0.0);
+            }
+
+            stream << name.toUpper();
+            if(i != (ui->tableWidget_3->rowCount()-1)){
+                stream << " ";
+            }
+            QCheckBox *cb = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 1));
+            if(!cb->isChecked()){
+               dataToWrite.append(ui->tableWidget_2->item(i,1)->text());
+            }else{
+                dataToWrite.append(ui->tableWidget_2->item(i,2)->text());
+            }
+            if(i != (ui->tableWidget_3->rowCount()-1)){
+                dataToWrite.append(" ");
+            }
+
+        }
+        stream<<"\n";
+        stream<<dataToWrite;
+        stream<<"\n";
+        powFile.close();
+    }
+
+    QString command  = scriptPath+"/hotspot -f system.flp -p "+temporaryFileName+" -steady_file tmp.txt";
+    //QProcess::startDetached( "/bin/bash", QStringList() << "-c"<<command);
+
+    QProcess pingProcess;
+    pingProcess.start(command);
+    pingProcess.waitForFinished();
+
+    QFile inputFileNew("tmp.txt");
+    if (inputFileNew.open(QIODevice::ReadOnly))
+    {
+       QTextStream in(&inputFileNew);
+       int count = 0;
+       while (count < ui->tableWidget_3->rowCount())
+       {
+          QString line = in.readLine();
+          qDebug() << "line";
+          qDebug() << line;
+          QString name = line.split("\t")[0];
+          QString temperature = line.split("\t")[1];
+          qDebug() << temperature;
+          count++;
+          QString command  = scriptPath+"/computeAlpha "+temperature;
+          QProcess pingProcess;
+          pingProcess.start(command);
+          pingProcess.waitForFinished();
+          QString output(pingProcess.readAllStandardOutput());
+          qDebug()<<output.split(":");
+          double alpha = output.split(":")[1].toFloat();
+          double interval = ui->currentTime->text().toFloat();
+          double weight = interval / alpha;
+          qDebug()<<name;
+          qDebug()<<weight;
+          alphas.insert(name,alphas.value(name)+weight);
+          double eee = alphas.value(name);
+
+          qDebug()<<eee;
+       }
+       inputFileNew.close();
+    }
+
+    QFile inputFile("tmp.txt");
+    //inputFile.remove();
+    QFile powFileToRemove(temporaryFileName);
+    //powFileToRemove.remove();
 
 }
