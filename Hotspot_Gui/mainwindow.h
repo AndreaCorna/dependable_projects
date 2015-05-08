@@ -22,6 +22,8 @@ public slots:
     void clear();
     void addNewLine();
     void intermediate();
+    void addLineSched();
+    void clearSched();
 
 private:
     Ui::MainWindow *ui;
@@ -29,6 +31,8 @@ private:
     QString dataPath;
     QString scriptPath;
     QHash<QString,double> alphas;
+    void generatePartScheduler();
+    void updateMap(bool cpu0Active, bool cpu1Active,bool cpu2Active,bool cpu3Active,double duration,int index);
 };
 
 #endif // MAINWINDOW_H

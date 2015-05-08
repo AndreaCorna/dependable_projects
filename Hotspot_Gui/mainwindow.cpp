@@ -35,11 +35,30 @@ void MainWindow::clear(){
     ui->idLine->setText("");
 }
 
+void MainWindow::generatePartScheduler(){
+
+
+    for(int i=0;i<ui->tableWidget_3->rowCount();i++){
+        double duration = ui->tableWidget_3->item(i,0)->text().toDouble();
+        qDebug() << "in generate part";
+        QCheckBox *cpu0 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 1));
+        QCheckBox *cpu1 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 2));
+        QCheckBox *cpu2 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 3));
+        QCheckBox *cpu3 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 4));
+
+        updateMap(cpu0->isChecked(),cpu1->isChecked(),cpu2->isChecked(),cpu3->isChecked(),duration,i);
+
+    }
+}
+
 void MainWindow::generateFiles(){
     if(ui->idLine->text() != ""){
         qDebug()<<"click generate";
         QHash<QString,float> powerMap;
         QHash<QString,bool> failedMap;
+
+
+        generatePartScheduler();
 
         QString flpFileName = "system.flp";
         QFile flpFile(flpFileName);
@@ -109,7 +128,7 @@ void MainWindow::generateFiles(){
             QTextStream stream(&powFile);
             for(int i = 0; i < powerMap.keys().length(); i++){
                 qDebug()<< "in loop";
-                double alpha = ui->totalTime->text().toFloat()/alphas.value(powerMap.keys()[i].toUpper());
+                double alpha = ui->totalTime->text().toDouble()/alphas.value(powerMap.keys()[i].toUpper());
                 stream << alpha;
                 if(i != (powerMap.keys().length()-1)){
                     stream << " ";
@@ -165,16 +184,23 @@ void MainWindow::setupTables(){
 
    ui->tableWidget_3->insertColumn(0);
    ui->tableWidget_3->insertColumn(1);
+   ui->tableWidget_3->insertColumn(2);
+   ui->tableWidget_3->insertColumn(3);
+   ui->tableWidget_3->insertColumn(4);
 
 
-   ui->tableWidget_3->setHorizontalHeaderItem(0,item);
-   ui->tableWidget_3->setHorizontalHeaderItem(1,item11);
+
+   ui->tableWidget_3->setHorizontalHeaderItem(0,new QTableWidgetItem("Period"));
+   ui->tableWidget_3->setHorizontalHeaderItem(1,new QTableWidgetItem("CPU0"));
+   ui->tableWidget_3->setHorizontalHeaderItem(2,new QTableWidgetItem("CPU1"));
+   ui->tableWidget_3->setHorizontalHeaderItem(3,new QTableWidgetItem("CPU2"));
+   ui->tableWidget_3->setHorizontalHeaderItem(4,new QTableWidgetItem("CPU3"));
+
 }
 
 void MainWindow::addNewLine(){
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget_2->insertRow(ui->tableWidget_2->rowCount());
-    ui->tableWidget_3->insertRow(ui->tableWidget_3->rowCount());
 
 
     QWidget *pWidget = new QWidget();
@@ -186,20 +212,126 @@ void MainWindow::addNewLine(){
     pWidget->setLayout(pLayout);
     ui->tableWidget_2->setCellWidget(ui->tableWidget_2->rowCount()-1,3,pCheckBox);
 
-    QWidget *pWidget1 = new QWidget();
-    QCheckBox *pCheckBox1 = new QCheckBox();
-    QHBoxLayout *pLayout1 = new QHBoxLayout(pWidget1);
-    pLayout1->addWidget(pCheckBox1);
-    pLayout1->setAlignment(Qt::AlignCenter);
-    pLayout1->setContentsMargins(0,0,0,0);
-    pWidget1->setLayout(pLayout1);
-    ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,1,pCheckBox1);
+
+}
+
+void MainWindow::updateMap(bool cpu0Active, bool cpu1Active,bool cpu2Active,bool cpu3Active,double duration,int index){
+
+    QString flpFileName = "system.flp";
+    QFile flpFile(flpFileName);
+    if(flpFile.open(QIODevice::ReadWrite)){
+        QTextStream stream(&flpFile);
+
+        for(int i = 0; i < ui->tableWidget->rowCount(); i++){
+            QString name = ui->tableWidget->item(i,0)->text().toUpper();
+            QString width = ui->tableWidget->item(i,1)->text().replace(",",".");
+            QString height = ui->tableWidget->item(i,2)->text().replace(",",".");
+            QString leftX = ui->tableWidget->item(i,3)->text().replace(",",".");
+            QString bottomY = ui->tableWidget->item(i,4)->text().replace(",",".");
+            QCheckBox *cb = qobject_cast<QCheckBox *>(ui->tableWidget_2->cellWidget(i, 3));
+            bool isFailed = false;
+            if(cb->isChecked()){
+                isFailed = true;
+            }
+            stream << name.toUpper() << " " << width << " "<< height << " "<< leftX << " "<< bottomY << "\n";
+
+        }
+    }
+    flpFile.close();
+
+    QString temporaryFileName = "system_"+ui->idLine->text()+"_"+QString::number(index)+".pow";
+    QFile powFile(temporaryFileName);
+    if(powFile.open(QIODevice::ReadWrite)){
+        QTextStream stream(&powFile);
+
+        for(int i = 0; i < ui->tableWidget->rowCount(); i++){
+            QString name = ui->tableWidget->item(i,0)->text().toUpper();
+            if(!alphas.keys().contains(name)){
+                alphas.insert(name,0.0);
+            }
+            stream << name.toUpper();
+            if(i != (ui->tableWidget->rowCount()-1)){
+                stream << " ";
+            }
+
+
+        }
+        QString dataToWrite = "";
+        if(cpu0Active){
+            dataToWrite.append(ui->tableWidget_2->item(0,2)->text());
+        }else{
+            dataToWrite.append(ui->tableWidget_2->item(0,1)->text());
+        }
+        dataToWrite.append(" ");
+        if(cpu1Active){
+            dataToWrite.append(ui->tableWidget_2->item(1,2)->text());
+        }else{
+            dataToWrite.append(ui->tableWidget_2->item(1,1)->text());
+        }
+        dataToWrite.append(" ");
+        if(cpu2Active){
+            dataToWrite.append(ui->tableWidget_2->item(2,2)->text());
+        }else{
+            dataToWrite.append(ui->tableWidget_2->item(2,1)->text());
+        }
+        dataToWrite.append(" ");
+        if(cpu3Active){
+            dataToWrite.append(ui->tableWidget_2->item(3,2)->text());
+        }else{
+            dataToWrite.append(ui->tableWidget_2->item(3,1)->text());
+        }
+        stream<<"\n";
+        stream<<dataToWrite;
+        stream<<"\n";
+        powFile.close();
+    }
+
+
+    QString command  = scriptPath+"/hotspot -f system.flp -p "+temporaryFileName+" -steady_file tmp.txt";
+
+    QProcess pingProcess;
+    pingProcess.start(command);
+    pingProcess.waitForFinished();
+
+    QFile inputFileNew("tmp.txt");if (inputFileNew.open(QIODevice::ReadOnly))
+    {
+       QTextStream in(&inputFileNew);
+       int count = 0;
+       while (count < ui->tableWidget->rowCount())
+       {
+          QString line = in.readLine();
+          qDebug() << "line";
+          qDebug() << line;
+          QString name = line.split("\t")[0];
+          QString temperature = line.split("\t")[1];
+          qDebug() << temperature;
+          count++;
+          QString command  = scriptPath+"/computeAlpha "+temperature;
+          QProcess pingProcess;
+          pingProcess.start(command);
+          pingProcess.waitForFinished();
+          QString output(pingProcess.readAllStandardOutput());
+          qDebug()<<output.split(":");
+          double alpha = output.split(":")[1].toDouble();
+          double weight = duration / alpha;
+          qDebug()<<name;
+          qDebug()<<weight;
+          double previous = alphas.value(name);
+          alphas.remove(name);
+          alphas.insert(name,previous+weight);
+          double eee = alphas.value(name);
+
+          qDebug()<<eee;
+       }
+       inputFileNew.close();
+    }
+
 
 
 }
 
 void MainWindow::intermediate(){
-    qDebug() << "click intermediate";
+    /*qDebug() << "click intermediate";
     QString dataToWrite = "";
     QString flpFileName = "system.flp";
     QFile flpFile(flpFileName);
@@ -227,14 +359,14 @@ void MainWindow::intermediate(){
     if(powFile.open(QIODevice::ReadWrite)){
         QTextStream stream(&powFile);
 
-        for(int i = 0; i < ui->tableWidget_3->rowCount(); i++){
+        for(int i = 0; i < ui->tableWidget->rowCount(); i++){
             QString name = ui->tableWidget->item(i,0)->text().toUpper();
             if(!alphas.keys().contains(name)){
                 alphas.insert(name,0.0);
             }
 
             stream << name.toUpper();
-            if(i != (ui->tableWidget_3->rowCount()-1)){
+            if(i != (ui->tableWidget->rowCount()-1)){
                 stream << " ";
             }
             QCheckBox *cb = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 1));
@@ -243,7 +375,7 @@ void MainWindow::intermediate(){
             }else{
                 dataToWrite.append(ui->tableWidget_2->item(i,2)->text());
             }
-            if(i != (ui->tableWidget_3->rowCount()-1)){
+            if(i != (ui->tableWidget->rowCount()-1)){
                 dataToWrite.append(" ");
             }
 
@@ -298,5 +430,56 @@ void MainWindow::intermediate(){
     //inputFile.remove();
     QFile powFileToRemove(temporaryFileName);
     //powFileToRemove.remove();
+*/
+}
 
+void MainWindow::addLineSched(){
+
+    ui->tableWidget_3->insertRow(ui->tableWidget_3->rowCount());
+
+
+    QWidget *pWidget0 = new QWidget();
+    QCheckBox *pCheckBox0 = new QCheckBox();
+    QHBoxLayout *pLayout0 = new QHBoxLayout(pWidget0);
+    pLayout0->addWidget(pCheckBox0);
+    pLayout0->setAlignment(Qt::AlignCenter);
+    pLayout0->setContentsMargins(0,0,0,0);
+    pWidget0->setLayout(pLayout0);
+    ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,1,pCheckBox0);
+
+    QWidget *pWidget1 = new QWidget();
+    QCheckBox *pCheckBox1 = new QCheckBox();
+    QHBoxLayout *pLayout1 = new QHBoxLayout(pWidget1);
+    pLayout1->addWidget(pCheckBox1);
+    pLayout1->setAlignment(Qt::AlignCenter);
+    pLayout1->setContentsMargins(0,0,0,0);
+    pWidget1->setLayout(pLayout1);
+    ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,2,pCheckBox1);
+
+    QWidget *pWidget2 = new QWidget();
+    QCheckBox *pCheckBox2 = new QCheckBox();
+    QHBoxLayout *pLayout2 = new QHBoxLayout(pWidget2);
+    pLayout2->addWidget(pCheckBox2);
+    pLayout2->setAlignment(Qt::AlignCenter);
+    pLayout2->setContentsMargins(0,0,0,0);
+    pWidget2->setLayout(pLayout2);
+    ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,3,pCheckBox2);
+
+    QWidget *pWidget3 = new QWidget();
+    QCheckBox *pCheckBox3 = new QCheckBox();
+    QHBoxLayout *pLayout3 = new QHBoxLayout(pWidget3);
+    pLayout3->addWidget(pCheckBox3);
+    pLayout3->setAlignment(Qt::AlignCenter);
+    pLayout3->setContentsMargins(0,0,0,0);
+    pWidget3->setLayout(pLayout3);
+    ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,4,pCheckBox3);
+
+
+}
+
+void MainWindow::clearSched(){
+    for(int i = ui->tableWidget_3->rowCount() ; i>=0 ; i--){
+        ui->tableWidget_3->removeRow(i);
+
+    }
 }

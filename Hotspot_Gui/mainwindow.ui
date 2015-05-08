@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>685</width>
-    <height>424</height>
+    <height>466</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -176,16 +176,6 @@
              <item>
               <widget class="QLineEdit" name="totalTime"/>
              </item>
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Current Time</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="currentTime"/>
-             </item>
             </layout>
            </item>
           </layout>
@@ -293,9 +283,9 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="intermediate">
+            <widget class="QPushButton" name="addLineSched">
              <property name="text">
-              <string>Intermediate</string>
+              <string>Add Line Scheduler</string>
              </property>
             </widget>
            </item>
@@ -311,6 +301,13 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="clearSched">
+             <property name="text">
+              <string>Clear Scheduler</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -361,12 +358,12 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>402</y>
+     <x>238</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
-     <x>719</x>
-     <y>474</y>
+     <x>684</x>
+     <y>465</y>
     </hint>
    </hints>
   </connection>
@@ -377,8 +374,8 @@
    <slot>generateFiles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>180</x>
-     <y>402</y>
+     <x>106</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
      <x>183</x>
@@ -393,28 +390,44 @@
    <slot>addNewLine()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>444</x>
-     <y>402</y>
+     <x>370</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
-     <y>515</y>
+     <y>465</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>intermediate</sender>
+   <sender>addLineSched</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>intermediate()</slot>
+   <slot>addLineSched()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>530</x>
-     <y>397</y>
+     <y>431</y>
     </hint>
     <hint type="destinationlabel">
-     <x>538</x>
-     <y>497</y>
+     <x>561</x>
+     <y>537</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearSched</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>clearSched()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>606</x>
+     <y>437</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>487</y>
     </hint>
    </hints>
   </connection>
@@ -424,5 +437,7 @@
   <slot>generateFiles()</slot>
   <slot>addNewLine()</slot>
   <slot>intermediate()</slot>
+  <slot>addLineSched()</slot>
+  <slot>clearSched()</slot>
  </slots>
 </ui>
