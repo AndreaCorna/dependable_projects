@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from os import listdir
 from os.path import isfile, join
+import itertools
+
 
 BASE_DIRECTORY = "."
 DATA_DIRECTORY = BASE_DIRECTORY+"/data"
@@ -74,10 +76,23 @@ for key in map_files.keys():
 				to_be_written = to_be_written + "," + str(failed)
 		print to_be_written
 		if to_be_written in list_states:
-		  first_elem = to_be_written.split(",")[0]
-		  second_elem = to_be_written.split(",")[1]
-		  to_be_written = second_elem+","+first_elem
-		print to_be_written
+		  if len(to_be_written.split(",")) == 2:
+		    first_elem = to_be_written.split(",")[0]
+		    second_elem = to_be_written.split(",")[1]
+		    to_be_written = second_elem+","+first_elem
+		  else:
+		    first_elem = to_be_written.split(",")[0]
+		    second_elem = to_be_written.split(",")[1]
+		    third_elem = to_be_written.split(",")[2]
+		    all_permutations = itertools.permutations([first_elem,second_elem,third_elem])
+		    for a in all_permutations:
+		      to_be_written = a[0]+","+a[1]+","+a[2]
+		      if to_be_written not in list_states:
+			break
+		      else:
+			to_be_written = None
+			
+		  print to_be_written
 		if len(to_be_written) > 1:
 		  list_states.append(to_be_written)
 		out_file.write(to_be_written)
