@@ -5,6 +5,8 @@
 #include "QMap"
 #include "QCheckBox"
 #include "QProcess"
+#include "QPair"
+#include "QList"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -45,8 +47,9 @@ void MainWindow::generatePartScheduler(){
         QCheckBox *cpu1 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 2));
         QCheckBox *cpu2 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 3));
         QCheckBox *cpu3 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 4));
+        QCheckBox *cpu4 = qobject_cast<QCheckBox *>(ui->tableWidget_3->cellWidget(i, 5));
 
-        updateMap(cpu0->isChecked(),cpu1->isChecked(),cpu2->isChecked(),cpu3->isChecked(),duration,i);
+        updateMap(cpu0->isChecked(),cpu1->isChecked(),cpu2->isChecked(),cpu3->isChecked(),cpu4->isChecked(),duration,i);
 
     }
 }
@@ -56,6 +59,7 @@ void MainWindow::generateFiles(){
         qDebug()<<"click generate";
         QHash<QString,float> powerMap;
         QHash<QString,bool> failedMap;
+        QList<QString> power2;
 
 
         generatePartScheduler();
@@ -85,6 +89,7 @@ void MainWindow::generateFiles(){
                 qDebug() << name << " " << width << " "<< height << " "<< leftX << " "<< bottomY << " ";
                 //float power = pIdle.toFloat() + ( pMax.toFloat() - pIdle.toFloat())*utlization.toFloat();
                 powerMap.insert(name,0);
+                power2.append(name);
                 stream << name.toUpper() << " " << width << " "<< height << " "<< leftX << " "<< bottomY << "\n";
                 qDebug() << isFailed;
                 failedMap.insert(name,isFailed);
@@ -100,12 +105,12 @@ void MainWindow::generateFiles(){
         QString nameFile = QString(dataPath+"/"+idWorkingState+"_");
 
         qDebug() << nameFile;
-        for(int i = 0; i < powerMap.keys().length(); i++){
+        for(int i = 0; i < power2.length(); i++){
             /*stream << powerMap.keys()[i].toUpper();
             if(i != (powerMap.keys().length()-1)){
                 stream << " ";
             }*/
-            if(!failedMap.value(powerMap.keys()[i])){
+            if(!failedMap.value(power2.at(i))){
                 nameFile.append("1");
                 qDebug() << nameFile;
 
@@ -114,7 +119,7 @@ void MainWindow::generateFiles(){
                 qDebug() << nameFile;
 
             }
-            if(i != (powerMap.keys().length()-1 )){
+            if(i != (power2.length()-1 )){
                 nameFile.append(":");
                 qDebug() << nameFile;
 
@@ -126,11 +131,11 @@ void MainWindow::generateFiles(){
         QFile powFile(nameFile);
         if(powFile.open(QIODevice::ReadWrite)){
             QTextStream stream(&powFile);
-            for(int i = 0; i < powerMap.keys().length(); i++){
+            for(int i = 0; i < power2.length(); i++){
                 qDebug()<< "in loop";
-                double alpha = ui->totalTime->text().toDouble()/alphas.value(powerMap.keys()[i].toUpper());
+                double alpha = ui->totalTime->text().toDouble()/alphas.value(power2.at(i).toUpper());
                 stream << alpha;
-                if(i != (powerMap.keys().length()-1)){
+                if(i != (power2.length()-1)){
                     stream << " ";
                 }
             }
@@ -187,14 +192,18 @@ void MainWindow::setupTables(){
    ui->tableWidget_3->insertColumn(2);
    ui->tableWidget_3->insertColumn(3);
    ui->tableWidget_3->insertColumn(4);
+   ui->tableWidget_3->insertColumn(5);
+
 
 
 
    ui->tableWidget_3->setHorizontalHeaderItem(0,new QTableWidgetItem("Period"));
-   ui->tableWidget_3->setHorizontalHeaderItem(1,new QTableWidgetItem("CPU0"));
-   ui->tableWidget_3->setHorizontalHeaderItem(2,new QTableWidgetItem("CPU1"));
-   ui->tableWidget_3->setHorizontalHeaderItem(3,new QTableWidgetItem("CPU2"));
-   ui->tableWidget_3->setHorizontalHeaderItem(4,new QTableWidgetItem("CPU3"));
+   ui->tableWidget_3->setHorizontalHeaderItem(1,new QTableWidgetItem("LI1"));
+   ui->tableWidget_3->setHorizontalHeaderItem(2,new QTableWidgetItem("LI2"));
+   ui->tableWidget_3->setHorizontalHeaderItem(3,new QTableWidgetItem("LI3"));
+   ui->tableWidget_3->setHorizontalHeaderItem(4,new QTableWidgetItem("HW1"));
+   ui->tableWidget_3->setHorizontalHeaderItem(5,new QTableWidgetItem("HW2"));
+
 
 }
 
@@ -215,7 +224,7 @@ void MainWindow::addNewLine(){
 
 }
 
-void MainWindow::updateMap(bool cpu0Active, bool cpu1Active,bool cpu2Active,bool cpu3Active,double duration,int index){
+void MainWindow::updateMap(bool cpu0Active, bool cpu1Active,bool cpu2Active,bool cpu3Active,bool cpu4Active,double duration,int index){
 
     QString flpFileName = "system.flp";
     QFile flpFile(flpFileName);
@@ -279,6 +288,12 @@ void MainWindow::updateMap(bool cpu0Active, bool cpu1Active,bool cpu2Active,bool
             dataToWrite.append(ui->tableWidget_2->item(3,2)->text());
         }else{
             dataToWrite.append(ui->tableWidget_2->item(3,1)->text());
+        }
+        dataToWrite.append(" ");
+        if(cpu4Active){
+            dataToWrite.append(ui->tableWidget_2->item(4,2)->text());
+        }else{
+            dataToWrite.append(ui->tableWidget_2->item(4,1)->text());
         }
         stream<<"\n";
         stream<<dataToWrite;
@@ -473,6 +488,15 @@ void MainWindow::addLineSched(){
     pLayout3->setContentsMargins(0,0,0,0);
     pWidget3->setLayout(pLayout3);
     ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,4,pCheckBox3);
+
+    QWidget *pWidget4 = new QWidget();
+    QCheckBox *pCheckBox4 = new QCheckBox();
+    QHBoxLayout *pLayout4 = new QHBoxLayout(pWidget4);
+    pLayout4->addWidget(pCheckBox4);
+    pLayout4->setAlignment(Qt::AlignCenter);
+    pLayout4->setContentsMargins(0,0,0,0);
+    pWidget4->setLayout(pLayout4);
+    ui->tableWidget_3->setCellWidget(ui->tableWidget_3->rowCount()-1,5,pCheckBox4);
 
 
 }

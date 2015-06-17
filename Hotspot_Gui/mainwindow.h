@@ -32,7 +32,7 @@ private:
     QString scriptPath;
     QHash<QString,double> alphas;
     void generatePartScheduler();
-    void updateMap(bool cpu0Active, bool cpu1Active,bool cpu2Active,bool cpu3Active,double duration,int index);
+    void updateMap(bool cpu0Active, bool cpu1Active,bool cpu2Active,bool cpu3Active,bool cpu4Active,double duration,int index);
 };
 
 #endif // MAINWINDOW_H

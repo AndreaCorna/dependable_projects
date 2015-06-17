@@ -3,5 +3,5 @@ Per poter usare lo script devi:
 2- copiare nella cartella script i due file caliper e computeAlpha che trovi nella cartella dell'homework
 3- nella cartella data trovi esempi di file da dare in pasto al simulator. In particolare il primo numero del nome è l'id del working state, i numeri separati da virgola indicano con 1 che il componente è funzionante, 0 altrimenti. Dentro in ogni file trovi il risultato della steady state temperature ottenuto da hotspot(questa parte la sto facendo)
 4- nella cartella result  viene generato il file dei risultati
-5- per lanciare il simulatore devi dare dalla cartella il comando python simulator.py
+5- per lanciare il simulatore devi dare dalla cartella il comando python simulator_average_alpha.py
 
